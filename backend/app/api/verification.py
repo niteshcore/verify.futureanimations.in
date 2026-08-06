@@ -53,7 +53,7 @@ def generate_verification():
     # The QR encodes the public verification URL for this token.
     qr_data_uri = generate_verification_qr_code(new_verification)
 
-    verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://futureanimations-verify.vercel.app')
+    verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://verify.futureanimations.in')
     verification_url = f"{verification_url_base}/verify/{new_verification.verification_token}"
 
     return jsonify({

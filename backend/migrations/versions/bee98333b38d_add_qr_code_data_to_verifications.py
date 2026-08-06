@@ -17,9 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    # qr_code_data is no longer stored in the database.
-    # QR codes are generated in-memory and returned directly in the API response.
-    # This migration is intentionally a no-op.
+    # No-op: qr_code_data is generated in-memory, not stored in DB
     pass
 
 

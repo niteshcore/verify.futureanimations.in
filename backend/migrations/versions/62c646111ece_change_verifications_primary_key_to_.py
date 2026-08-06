@@ -1,4 +1,4 @@
-"""change verifications primary key to auto_increment id
+"""safely add id SERIAL column to verifications (preserves all existing data)
 
 Revision ID: 62c646111ece
 Revises: bee98333b38d
@@ -17,55 +17,32 @@ depends_on = None
 
 
 def upgrade():
-    # Detect database dialect (SQLite vs PostgreSQL)
     bind = op.get_bind()
-    if bind.dialect.name == 'sqlite':
-        op.execute("DROP TABLE IF EXISTS verifications")
+    if bind.dialect.name == 'postgresql':
+        # ADD COLUMN IF NOT EXISTS id SERIAL — safe, preserves all existing rows
+        # Existing rows get auto-assigned sequential IDs; new inserts auto-increment
+        bind.execute(sa.text("""
+            ALTER TABLE verifications
+            ADD COLUMN IF NOT EXISTS id SERIAL
+        """))
     else:
-        # PostgreSQL CASCADE drops the table and all associated indexes/constraints safely
-        op.execute("DROP TABLE IF EXISTS verifications CASCADE")
-    
-    op.create_table(
-        'verifications',
-        sa.Column('id', sa.Integer(), primary_key=True, autoincrement=True),
-        sa.Column('verification_token', sa.String(length=36), nullable=False),
-        sa.Column('student_name', sa.String(length=100), nullable=False),
-        sa.Column('email', sa.String(length=120), nullable=False),
-        sa.Column('internship_role', sa.String(length=100), nullable=False),
-        sa.Column('department', sa.String(length=100), nullable=False),
-        sa.Column('start_date', sa.Date(), nullable=False),
-        sa.Column('end_date', sa.Date(), nullable=False),
-        sa.Column('issue_date', sa.Date(), nullable=False),
-        sa.Column('completion_status', sa.String(length=50), nullable=False),
-        sa.Column('company_name', sa.String(length=100), nullable=False),
-        sa.Column('signatory_name', sa.String(length=100), nullable=False),
-        sa.Column('signatory_designation', sa.String(length=100), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False)
-    )
-    op.create_index('ix_verifications_verification_token', 'verifications', ['verification_token'], unique=True)
+        # SQLite (local dev) — add nullable integer column
+        try:
+            with op.batch_alter_table('verifications') as batch_op:
+                batch_op.add_column(sa.Column('id', sa.Integer(), nullable=True))
+        except Exception:
+            pass  # Column may already exist in local dev DB
 
 
 def downgrade():
     bind = op.get_bind()
-    if bind.dialect.name == 'sqlite':
-        op.execute("DROP TABLE IF EXISTS verifications")
+    if bind.dialect.name == 'postgresql':
+        bind.execute(sa.text("""
+            ALTER TABLE verifications DROP COLUMN IF EXISTS id
+        """))
     else:
-        op.execute("DROP TABLE IF EXISTS verifications CASCADE")
-    
-    op.create_table(
-        'verifications',
-        sa.Column('verification_token', sa.String(length=36), primary_key=True, nullable=False),
-        sa.Column('student_name', sa.String(length=100), nullable=False),
-        sa.Column('email', sa.String(length=120), nullable=False),
-        sa.Column('internship_role', sa.String(length=100), nullable=False),
-        sa.Column('department', sa.String(length=100), nullable=False),
-        sa.Column('start_date', sa.Date(), nullable=False),
-        sa.Column('end_date', sa.Date(), nullable=False),
-        sa.Column('issue_date', sa.Date(), nullable=False),
-        sa.Column('completion_status', sa.String(length=50), nullable=False),
-        sa.Column('company_name', sa.String(length=100), nullable=False),
-        sa.Column('signatory_name', sa.String(length=100), nullable=False),
-        sa.Column('signatory_designation', sa.String(length=100), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False)
-    )
-    op.create_index('ix_verifications_verification_token', 'verifications', ['verification_token'], unique=False)
+        try:
+            with op.batch_alter_table('verifications') as batch_op:
+                batch_op.drop_column('id')
+        except Exception:
+            pass

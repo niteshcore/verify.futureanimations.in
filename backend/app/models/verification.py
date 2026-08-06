@@ -5,8 +5,10 @@ from app.core.extensions import db
 class Verification(db.Model):
     __tablename__ = 'verifications'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    verification_token = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), unique=True, index=True)
+    # verification_token remains the primary key — preserves existing production schema
+    verification_token = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
+    # id is a SERIAL column added via migration — used only for certificate_id display
+    id = db.Column(db.Integer, nullable=True)
     student_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     internship_role = db.Column(db.String(100), nullable=False)
@@ -23,4 +25,8 @@ class Verification(db.Model):
     @property
     def certificate_id(self):
         year = self.issue_date.year if self.issue_date else datetime.utcnow().year
-        return f"TFA-INT-{year}-{self.id:03d}"
+        if self.id:
+            return f"TFA-INT-{year}-{self.id:03d}"
+        # Fallback before id column is populated (first deploy)
+        short = self.verification_token.replace('-', '')[:5].upper()
+        return f"TFA-INT-{year}-{short}"

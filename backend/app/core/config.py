@@ -12,11 +12,10 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = 86400  # 1 day
 
     # QR codes will encode this URL + /verify/<token>
-    # Defaults to the live Vercel deployment URL.
-    # Set VERIFICATION_URL_BASE env var on Render to override (e.g. when custom domain is live).
+    # Defaults to the canonical custom domain. Override with VERIFICATION_URL_BASE env var if needed.
     VERIFICATION_URL_BASE = os.environ.get(
         "VERIFICATION_URL_BASE",
-        "https://futureanimations-verify.vercel.app"
+        "https://verify.futureanimations.in"
     )
 
     FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173,http://127.0.0.1:5173")
