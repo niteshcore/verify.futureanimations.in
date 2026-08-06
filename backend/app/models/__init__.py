@@ -1,2 +1,2 @@
 from .admin import Admin
-from .certificate import Certificate, VerificationLog
+from .certificate import Certificate
