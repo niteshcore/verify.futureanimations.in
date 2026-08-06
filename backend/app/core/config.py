@@ -15,14 +15,22 @@ class Config:
     FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173,http://127.0.0.1:5173")
     PORT = int(os.environ.get("PORT", "5001"))
     HOST = os.environ.get("HOST", "0.0.0.0")
-    FRONTEND_URLS = [origin.strip() for origin in os.environ.get(
-        "FRONTEND_URLS",
-        FRONTEND_URL
-    ).split(",") if origin.strip()]
-    if "http://127.0.0.1:5173" not in FRONTEND_URLS:
-        FRONTEND_URLS.append("http://127.0.0.1:5173")
-    if "http://localhost:5173" not in FRONTEND_URLS:
-        FRONTEND_URLS.append("http://localhost:5173")
+
+    # Build allowed origins list from env or default to local dev URLs
+    _raw_origins = os.environ.get("FRONTEND_URLS", FRONTEND_URL)
+    FRONTEND_URLS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
+    # Always include production Vercel domain
+    _production_origins = [
+        "https://verify.futureanimations.in",
+        "https://www.verify.futureanimations.in",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ]
+    for _o in _production_origins:
+        if _o not in FRONTEND_URLS:
+            FRONTEND_URLS.append(_o)
+
     CORS_ALLOWED_ORIGINS = FRONTEND_URLS
 
     STORAGE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'storage')
