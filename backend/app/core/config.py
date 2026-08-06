@@ -10,6 +10,7 @@ class Config:
 
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-dev-secret-key")
     JWT_ACCESS_TOKEN_EXPIRES = 86400  # 1 day
+    VERIFICATION_URL_BASE = os.environ.get("VERIFICATION_URL_BASE", "https://verify.futureanimations.in")
 
     FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173,http://127.0.0.1:5173")
     PORT = int(os.environ.get("PORT", "5001"))
@@ -27,3 +28,4 @@ class Config:
     STORAGE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'storage')
     QR_CODES_DIR = os.path.join(STORAGE_DIR, 'qrcodes')
     PDFS_DIR = os.path.join(STORAGE_DIR, 'pdfs')
+    QR_DIR = os.path.join(STORAGE_DIR, 'qr')

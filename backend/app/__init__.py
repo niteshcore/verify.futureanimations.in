@@ -28,15 +28,18 @@ def create_app(config_class=Config):
     # Ensure storage dirs exist
     os.makedirs(app.config['QR_CODES_DIR'], exist_ok=True)
     os.makedirs(app.config['PDFS_DIR'], exist_ok=True)
+    os.makedirs(app.config['QR_DIR'], exist_ok=True)
 
     # Register Blueprints
     from app.api.auth import auth_bp
     from app.api.certificates import certificates_bp
     from app.api.stats import stats_bp
+    from app.api.verification import verification_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(certificates_bp, url_prefix='/api/v1/certificates')
     app.register_blueprint(stats_bp, url_prefix='/api/v1/stats')
+    app.register_blueprint(verification_bp, url_prefix='/api/v1/verification')
 
     @app.route('/')
     def index():

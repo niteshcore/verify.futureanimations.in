@@ -62,3 +62,27 @@ def generate_qr_code(certificate_id_or_obj):
     img.save(filepath)
 
     return f"qrcodes/{filename}"
+
+
+def generate_verification_qr_code(verification):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+
+    verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://verify.futureanimations.in')
+    verify_url = f"{verification_url_base}/verify/{verification.verification_token}"
+
+    qr.add_data(verify_url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    filename = f"{verification.verification_token}.png"
+    filepath = os.path.join(current_app.config['QR_DIR'], filename)
+    img.save(filepath)
+
+    return f"qr/{filename}"
+
