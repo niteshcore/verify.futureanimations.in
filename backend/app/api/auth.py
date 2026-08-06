@@ -1,12 +1,11 @@
 from flask import Blueprint, request, jsonify
-from flask_cors import cross_origin
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models.admin import Admin
 
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST', 'OPTIONS'])
-@cross_origin(origins=["http://localhost:5173", "http://127.0.0.1:5173"], methods=["POST", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+
 def login():
     data = request.get_json()
     if not data or not data.get('username') or not data.get('password'):
