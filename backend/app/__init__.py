@@ -15,7 +15,8 @@ def create_app(config_class=Config):
     
     from flask_cors import CORS
     
-    print(app.config["CORS_ALLOWED_ORIGINS"])
+    print(f"[CONFIG] VERIFICATION_URL_BASE = {app.config['VERIFICATION_URL_BASE']}")
+    print(f"[CONFIG] CORS_ALLOWED_ORIGINS  = {app.config['CORS_ALLOWED_ORIGINS']}")
 
     CORS(
         app,
