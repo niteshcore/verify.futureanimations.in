@@ -17,6 +17,4 @@ class Verification(db.Model):
     company_name = db.Column(db.String(100), default='The Future Animations', nullable=False)
     signatory_name = db.Column(db.String(100), nullable=False)
     signatory_designation = db.Column(db.String(100), nullable=False)
-    # QR code stored as base64 data URI — no filesystem dependency (works on Render/cloud)
-    qr_code_data = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

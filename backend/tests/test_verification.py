@@ -106,18 +106,34 @@ class VerificationTestCase(unittest.TestCase):
         self.assertEqual(data["msg"], "Verification Record Not Found.")
 
     def test_serve_qr_directory_traversal_prevention(self):
-        # Valid name path (file not found in tmp, so returns 404)
-        response = self.client.get('/api/v1/verification/qr/token.png')
+        # Generate a verification first to get a real token
+        payload = {
+            "student_name": "QR Test",
+            "email": "qr@test.com",
+            "internship_role": "Dev Intern",
+            "department": "Engineering",
+            "start_date": "2026-01-01",
+            "end_date": "2026-06-30",
+            "issue_date": "2026-07-01",
+            "completion_status": "Completed",
+            "signatory_name": "Jane Director",
+            "signatory_designation": "Director"
+        }
+        headers = {"Authorization": f"Bearer {self.token}"}
+        gen_res = self.client.post('/api/v1/verification/generate', json=payload, headers=headers)
+        self.assertEqual(gen_res.status_code, 201)
+        token = gen_res.get_json()["verification_token"]
+
+        # Valid token returns QR data
+        response = self.client.get(f'/api/v1/verification/qr/{token}')
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIn("qr_image_data", data)
+        self.assertTrue(data["qr_image_data"].startswith("data:image/png;base64,"))
+
+        # Non-existent token returns 404
+        response = self.client.get('/api/v1/verification/qr/non-existent-token')
         self.assertEqual(response.status_code, 404)
-
-        # Directory traversal attempt
-        response = self.client.get('/api/v1/verification/qr/../../etc/passwd')
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.get_json()["msg"], "Access denied")
-
-        # Directory traversal attempt 2
-        response = self.client.get('/api/v1/verification/qr/%2e%2e%2f%2e%2e%2fconfig.py')
-        self.assertEqual(response.status_code, 403)
 
 def datetime_from_str(s):
     from datetime import datetime

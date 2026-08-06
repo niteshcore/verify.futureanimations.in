@@ -1,4 +1,4 @@
-"""add qr_code_data to verifications
+"""no-op: qr_code_data column removed from model, stored in memory only
 
 Revision ID: bee98333b38d
 Revises: 
@@ -17,12 +17,11 @@ depends_on = None
 
 
 def upgrade():
-    # Add qr_code_data column to store QR as base64 data URI in the database
-    # This avoids filesystem dependency on ephemeral cloud platforms like Render
-    with op.batch_alter_table('verifications', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('qr_code_data', sa.Text(), nullable=True))
+    # qr_code_data is no longer stored in the database.
+    # QR codes are generated in-memory and returned directly in the API response.
+    # This migration is intentionally a no-op.
+    pass
 
 
 def downgrade():
-    with op.batch_alter_table('verifications', schema=None) as batch_op:
-        batch_op.drop_column('qr_code_data')
+    pass

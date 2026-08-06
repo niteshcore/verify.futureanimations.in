@@ -1,13 +1,12 @@
-from flask import Blueprint, request, jsonify, current_app, send_from_directory
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required
 from app.models.verification import Verification
 from app.core.extensions import db
 from app.services.qr_service import generate_verification_qr_code
 from datetime import datetime
-from werkzeug.utils import secure_filename
-import os
 
 verification_bp = Blueprint('verification', __name__)
+
 
 @verification_bp.route('/generate', methods=['POST'])
 @jwt_required()
@@ -23,7 +22,7 @@ def generate_verification():
         if req not in data or not str(data[req]).strip():
             return jsonify({"msg": f"Missing required field: {req}"}), 400
 
-    # Ensure company_name is fixed on the backend
+    # Company name is always fixed — never comes from user input
     company_name = "The Future Animations"
 
     try:
@@ -50,12 +49,9 @@ def generate_verification():
     db.session.add(new_verification)
     db.session.commit()
 
-    # Generate QR code (returns base64 data URI — no disk writes)
+    # Generate QR code as base64 data URI (in-memory, no filesystem writes)
+    # The QR encodes the public verification URL for this token.
     qr_data_uri = generate_verification_qr_code(new_verification)
-
-    # Persist QR data in the DB so it survives across restarts/redeployments
-    new_verification.qr_code_data = qr_data_uri
-    db.session.commit()
 
     verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://verify.futureanimations.in')
     verification_url = f"{verification_url_base}/verify/{new_verification.verification_token}"
@@ -71,11 +67,9 @@ def generate_verification():
 
 @verification_bp.route('/<string:verification_token>', methods=['GET'])
 def get_verification(verification_token):
-    # Fetch record using token
     v = Verification.query.filter_by(verification_token=verification_token).first()
 
     if not v:
-        # Prevent exposing backend errors, show a simple 404 message
         return jsonify({"msg": "Verification Record Not Found."}), 404
 
     return jsonify({
@@ -95,18 +89,12 @@ def get_verification(verification_token):
     })
 
 
-@verification_bp.route('/qr/<path:filename>', methods=['GET'])
-def serve_qr(filename):
-    # Security check: Prevent directory traversal
-    safe_filename = secure_filename(filename)
-    if not safe_filename.endswith('.png') or safe_filename != filename:
-        return jsonify({"msg": "Access denied"}), 403
+@verification_bp.route('/qr/<string:token>', methods=['GET'])
+def get_qr_for_token(token):
+    """Regenerate and return the QR code data URI for an existing verification token."""
+    v = Verification.query.filter_by(verification_token=token).first()
+    if not v:
+        return jsonify({"msg": "Verification Record Not Found."}), 404
 
-    qr_dir = current_app.config['QR_DIR']
-    file_path = os.path.join(qr_dir, safe_filename)
-    
-    # Verify that the file actually exists inside the QR directory
-    if not os.path.exists(file_path):
-        return jsonify({"msg": "File not found"}), 404
-        
-    return send_from_directory(qr_dir, safe_filename)
+    qr_data_uri = generate_verification_qr_code(v)
+    return jsonify({"qr_image_data": qr_data_uri})
