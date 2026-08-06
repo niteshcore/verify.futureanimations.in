@@ -37,27 +37,32 @@ def create_certificate():
             return jsonify({"msg": f"Missing required field: {req}"}), 400
             
     cert_id = generate_certificate_id()
-    
+
     new_cert = Certificate(
-        certificate_id=cert_id,
-        student_name=data['student_name'],
-        email=data['email'],
-        phone=data.get('phone'),
-        internship_role=data['internship_role'],
-        department=data['department'],
-        start_date=datetime.strptime(data['start_date'], '%Y-%m-%d').date(),
-        end_date=datetime.strptime(data['end_date'], '%Y-%m-%d').date(),
-        issue_date=datetime.strptime(data['issue_date'], '%Y-%m-%d').date(),
-        completion_status=data['completion_status'],
-        qr_code_path=qr_path,
-        company_name=data.get('company_name', 'The Future Animations'),
-        signatory_name=data['signatory_name'],
-        signatory_designation=data['signatory_designation']
-    )
-    
+    certificate_id=cert_id,
+    student_name=data['student_name'],
+    email=data['email'],
+    phone=data.get('phone'),
+    internship_role=data['internship_role'],
+    department=data['department'],
+    start_date=datetime.strptime(data['start_date'], '%Y-%m-%d').date(),
+    end_date=datetime.strptime(data['end_date'], '%Y-%m-%d').date(),
+    issue_date=datetime.strptime(data['issue_date'], '%Y-%m-%d').date(),
+    completion_status=data['completion_status'],
+    company_name=data.get('company_name', 'The Future Animations'),
+    signatory_name=data['signatory_name'],
+    signatory_designation=data['signatory_designation']
+)
+
     db.session.add(new_cert)
+    db.session.flush()          # ID mil jayegi
+
     qr_path = generate_qr_code(new_cert)
+
+    new_cert.qr_code_path = qr_path
+
     db.session.commit()
+    
     
     return jsonify({"msg": "Certificate created successfully", "certificate_id": cert_id}), 201
 
