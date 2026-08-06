@@ -14,6 +14,9 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     
     from flask_cors import CORS
+    
+    print(app.config["CORS_ALLOWED_ORIGINS"])
+
     CORS(
         app,
         resources={r"/api/*": {"origins": app.config.get('CORS_ALLOWED_ORIGINS', app.config.get('FRONTEND_URLS', [app.config.get('FRONTEND_URL')]))}},
