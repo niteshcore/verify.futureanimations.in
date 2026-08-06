@@ -109,7 +109,7 @@ const VerifyCertificate = () => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-800 text-base leading-tight">The Future Animations</h3>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Official Verification Registry</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Official Internship Verification Portal</p>
                 </div>
               </div>
 
@@ -197,8 +197,8 @@ const VerifyCertificate = () => {
                   <Clock className="w-4 h-4 text-slate-400" />
                   <span>Scan Verified: {formatDate(result.verified_at)} {new Date(result.verified_at).toLocaleTimeString()}</span>
                 </div>
-                <div className="text-[10px] font-mono bg-slate-200/50 px-3 py-1 rounded-md text-slate-600 border border-slate-200 shrink-0 break-all max-w-full">
-                  TOKEN: {id}
+                <div className="text-[11px] font-bold tracking-wider text-slate-600 uppercase">
+                  Certificate ID: <span className="font-mono text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-md">{result.certificate_id}</span>
                 </div>
               </div>
             </div>

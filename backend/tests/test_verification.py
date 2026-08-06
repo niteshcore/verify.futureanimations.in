@@ -65,6 +65,8 @@ class VerificationTestCase(unittest.TestCase):
         self.assertIn("qr_image_data", data)
         self.assertTrue(data["qr_image_data"].startswith("data:image/png;base64,"))
         self.assertEqual(data["qr_filename"], f"{data['verification_token']}.png")
+        self.assertIn("certificate_id", data)
+        self.assertTrue(data["certificate_id"].startswith("TFA-INT-"))
         
         # Verify it is in database
         with self.app.app_context():
@@ -98,6 +100,8 @@ class VerificationTestCase(unittest.TestCase):
         self.assertEqual(data["student_name"], "Alice Smith")
         self.assertEqual(data["company_name"], "The Future Animations")
         self.assertIn("verified_at", data)
+        self.assertIn("certificate_id", data)
+        self.assertTrue(data["certificate_id"].startswith("TFA-INT-"))
 
     def test_get_verification_not_found(self):
         response = self.client.get('/api/v1/verification/non-existent-token')
@@ -180,6 +184,10 @@ class VerificationTestCase(unittest.TestCase):
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]["student_name"], "Charlie Brown") # Sorted desc by created_at
         self.assertEqual(data[1]["student_name"], "Alice Smith")
+        self.assertIn("certificate_id", data[0])
+        self.assertIn("certificate_id", data[1])
+        self.assertTrue(data[0]["certificate_id"].startswith("TFA-INT-"))
+        self.assertTrue(data[1]["certificate_id"].startswith("TFA-INT-"))
 
 def datetime_from_str(s):
     from datetime import datetime

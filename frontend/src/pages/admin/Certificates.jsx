@@ -198,6 +198,7 @@ const Certificates = () => {
                   <tr key={record.verification_token} className="hover:bg-slate-50/40 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-bold text-slate-800 text-sm">{record.student_name}</div>
+                      <div className="text-xs text-blue-600 font-mono font-bold mt-0.5">{record.certificate_id}</div>
                       <div className="text-xs text-slate-400">{record.email}</div>
                     </td>
                     <td className="px-6 py-4">
@@ -286,8 +287,9 @@ const Certificates = () => {
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
               className="bg-white rounded-3xl p-8 max-w-sm w-full relative z-10 border border-slate-100 shadow-2xl flex flex-col items-center text-center space-y-6"
             >
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <h4 className="font-extrabold text-slate-800 text-lg">{selectedRecord.student_name}</h4>
+                <div className="text-[10px] text-blue-600 font-mono font-bold uppercase tracking-wider bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full inline-block">{selectedRecord.certificate_id}</div>
                 <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">{selectedRecord.internship_role}</p>
               </div>
 

@@ -61,7 +61,8 @@ def generate_verification():
         "verification_token": new_verification.verification_token,
         "verification_url": verification_url,
         "qr_image_data": qr_data_uri,
-        "qr_filename": f"{new_verification.verification_token}.png"
+        "qr_filename": f"{new_verification.verification_token}.png",
+        "certificate_id": new_verification.certificate_id
     }), 201
 
 
@@ -82,7 +83,8 @@ def list_verifications():
         "company_name": r.company_name,
         "signatory_name": r.signatory_name,
         "signatory_designation": r.signatory_designation,
-        "created_at": r.created_at.isoformat()
+        "created_at": r.created_at.isoformat(),
+        "certificate_id": r.certificate_id
     } for r in records])
 
 
@@ -106,7 +108,8 @@ def get_verification(verification_token):
         "signatory_name": v.signatory_name,
         "signatory_designation": v.signatory_designation,
         "created_at": v.created_at.isoformat(),
-        "verified_at": datetime.utcnow().isoformat()
+        "verified_at": datetime.utcnow().isoformat(),
+        "certificate_id": v.certificate_id
     })
 
 
