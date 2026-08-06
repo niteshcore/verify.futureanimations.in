@@ -62,7 +62,8 @@ class VerificationTestCase(unittest.TestCase):
         data = response.get_json()
         self.assertIn("verification_token", data)
         self.assertIn("verification_url", data)
-        self.assertIn("qr_image", data)
+        self.assertIn("qr_image_data", data)
+        self.assertTrue(data["qr_image_data"].startswith("data:image/png;base64,"))
         self.assertEqual(data["qr_filename"], f"{data['verification_token']}.png")
         
         # Verify it is in database
