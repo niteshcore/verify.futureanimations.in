@@ -49,19 +49,10 @@ const Dashboard = () => {
     }
   };
 
-  const getQrUrl = (qrImagePath) => {
-    if (!qrImagePath) return '';
-    // Serve static files via the verification qr endpoint
-    const baseUrl = import.meta.env.VITE_API_URL || '/api/v1';
-    const filename = qrImagePath.replace('qr/', '');
-    return `${baseUrl.replace('/api/v1', '')}/api/v1/verification/qr/${filename}`;
-  };
-
-  const downloadQr = (qrImagePath, filename) => {
-    const url = getQrUrl(qrImagePath);
-    if (!url) return;
+  const downloadQr = (dataUri, filename) => {
+    if (!dataUri) return;
     const link = document.createElement('a');
-    link.href = url;
+    link.href = dataUri;
     link.download = filename || 'verification-qr.png';
     document.body.appendChild(link);
     link.click();
@@ -245,7 +236,7 @@ const Dashboard = () => {
 
               <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50 inline-block shadow-inner">
                 <img 
-                  src={getQrUrl(generated.qr_image)} 
+                  src={generated.qr_image_data} 
                   alt="Verification QR" 
                   className="w-44 h-44 rounded-lg bg-white" 
                 />
@@ -253,7 +244,7 @@ const Dashboard = () => {
 
               <div className="space-y-3">
                 <button 
-                  onClick={() => downloadQr(generated.qr_image, generated.qr_filename)}
+                  onClick={() => downloadQr(generated.qr_image_data, generated.qr_filename)}
                   className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-[var(--color-secondary)] hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
                 >
                   <Download className="w-4 h-4" />

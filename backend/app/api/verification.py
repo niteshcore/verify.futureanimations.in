@@ -50,8 +50,12 @@ def generate_verification():
     db.session.add(new_verification)
     db.session.commit()
 
-    # Generate QR code
-    qr_path = generate_verification_qr_code(new_verification)
+    # Generate QR code (returns base64 data URI — no disk writes)
+    qr_data_uri = generate_verification_qr_code(new_verification)
+
+    # Persist QR data in the DB so it survives across restarts/redeployments
+    new_verification.qr_code_data = qr_data_uri
+    db.session.commit()
 
     verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://verify.futureanimations.in')
     verification_url = f"{verification_url_base}/verify/{new_verification.verification_token}"
@@ -60,7 +64,7 @@ def generate_verification():
         "msg": "Verification record and QR generated successfully",
         "verification_token": new_verification.verification_token,
         "verification_url": verification_url,
-        "qr_image": qr_path,
+        "qr_image_data": qr_data_uri,
         "qr_filename": f"{new_verification.verification_token}.png"
     }), 201
 

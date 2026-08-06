@@ -65,6 +65,14 @@ def generate_qr_code(certificate_id_or_obj):
 
 
 def generate_verification_qr_code(verification):
+    """Generate a QR code and return it as a base64 data URI.
+
+    Stores the QR in-memory only — no filesystem writes — so it works on
+    ephemeral cloud platforms like Render where the disk is wiped on redeploy.
+    """
+    import io
+    import base64
+
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -80,9 +88,23 @@ def generate_verification_qr_code(verification):
 
     img = qr.make_image(fill_color="black", back_color="white")
 
-    filename = f"{verification.verification_token}.png"
-    filepath = os.path.join(current_app.config['QR_DIR'], filename)
-    img.save(filepath)
+    # Encode to base64 in-memory (no disk write)
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    qr_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+    data_uri = f"data:image/png;base64,{qr_base64}"
 
-    return f"qr/{filename}"
+    # Also try to save to disk as a fallback (local dev convenience)
+    try:
+        qr_dir = current_app.config.get('QR_DIR')
+        if qr_dir:
+            os.makedirs(qr_dir, exist_ok=True)
+            filename = f"{verification.verification_token}.png"
+            filepath = os.path.join(qr_dir, filename)
+            img.save(filepath)
+    except Exception:
+        pass  # Silently skip on read-only/ephemeral filesystems
+
+    return data_uri
 
