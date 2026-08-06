@@ -10,7 +10,14 @@ class Config:
 
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "jwt-dev-secret-key")
     JWT_ACCESS_TOKEN_EXPIRES = 86400  # 1 day
-    VERIFICATION_URL_BASE = os.environ.get("VERIFICATION_URL_BASE", "https://verify.futureanimations.in")
+
+    # QR codes will encode this URL + /verify/<token>
+    # Defaults to the live Vercel deployment URL.
+    # Set VERIFICATION_URL_BASE env var on Render to override (e.g. when custom domain is live).
+    VERIFICATION_URL_BASE = os.environ.get(
+        "VERIFICATION_URL_BASE",
+        "https://futureanimations-verify.vercel.app"
+    )
 
     FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173,http://127.0.0.1:5173")
     PORT = int(os.environ.get("PORT", "5001"))
@@ -20,14 +27,15 @@ class Config:
     _raw_origins = os.environ.get("FRONTEND_URLS", FRONTEND_URL)
     FRONTEND_URLS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
-    # Always include production Vercel domain
-    _production_origins = [
-        "https://verify.futureanimations.in",
+    # Always include all known frontend origins so CORS never blocks the frontend
+    _known_origins = [
+        "https://futureanimations-verify.vercel.app",   # Vercel deployment (live)
+        "https://verify.futureanimations.in",           # custom domain (when DNS is configured)
         "https://www.verify.futureanimations.in",
         "http://127.0.0.1:5173",
         "http://localhost:5173",
     ]
-    for _o in _production_origins:
+    for _o in _known_origins:
         if _o not in FRONTEND_URLS:
             FRONTEND_URLS.append(_o)
 
