@@ -65,6 +65,16 @@ def generate_verification():
     }), 201
 
 
+@verification_bp.route('/debug-config', methods=['GET'])
+def debug_config():
+    import os
+    return jsonify({
+        "VERIFICATION_URL_BASE_config": current_app.config.get('VERIFICATION_URL_BASE'),
+        "VERIFICATION_URL_BASE_env": os.environ.get('VERIFICATION_URL_BASE'),
+        "has_env_var": 'VERIFICATION_URL_BASE' in os.environ
+    })
+
+
 @verification_bp.route('/<string:verification_token>', methods=['GET'])
 def get_verification(verification_token):
     v = Verification.query.filter_by(verification_token=verification_token).first()
@@ -99,12 +109,3 @@ def get_qr_for_token(token):
     qr_data_uri = generate_verification_qr_code(v)
     return jsonify({"qr_image_data": qr_data_uri})
 
-
-@verification_bp.route('/debug-config', methods=['GET'])
-def debug_config():
-    import os
-    return jsonify({
-        "VERIFICATION_URL_BASE_config": current_app.config.get('VERIFICATION_URL_BASE'),
-        "VERIFICATION_URL_BASE_env": os.environ.get('VERIFICATION_URL_BASE'),
-        "has_env_var": 'VERIFICATION_URL_BASE' in os.environ
-    })
