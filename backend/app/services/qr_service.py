@@ -80,7 +80,7 @@ def generate_verification_qr_code(verification):
         border=4,
     )
 
-    verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://verify.futureanimations.in')
+    verification_url_base = current_app.config.get('VERIFICATION_URL_BASE', 'https://futureanimations-verify.vercel.app')
     verify_url = f"{verification_url_base}/verify/{verification.verification_token}"
 
     qr.add_data(verify_url)
