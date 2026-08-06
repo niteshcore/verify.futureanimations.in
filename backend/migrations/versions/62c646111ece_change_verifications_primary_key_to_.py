@@ -17,16 +17,13 @@ depends_on = None
 
 
 def upgrade():
-    # Safely drop index and table, then recreate
-    try:
-        op.drop_index('ix_verifications_verification_token', table_name='verifications')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_table('verifications')
-    except Exception:
-        pass
+    # Detect database dialect (SQLite vs PostgreSQL)
+    bind = op.get_bind()
+    if bind.dialect.name == 'sqlite':
+        op.execute("DROP TABLE IF EXISTS verifications")
+    else:
+        # PostgreSQL CASCADE drops the table and all associated indexes/constraints safely
+        op.execute("DROP TABLE IF EXISTS verifications CASCADE")
     
     op.create_table(
         'verifications',
@@ -49,15 +46,11 @@ def upgrade():
 
 
 def downgrade():
-    try:
-        op.drop_index('ix_verifications_verification_token', table_name='verifications')
-    except Exception:
-        pass
-        
-    try:
-        op.drop_table('verifications')
-    except Exception:
-        pass
+    bind = op.get_bind()
+    if bind.dialect.name == 'sqlite':
+        op.execute("DROP TABLE IF EXISTS verifications")
+    else:
+        op.execute("DROP TABLE IF EXISTS verifications CASCADE")
     
     op.create_table(
         'verifications',
