@@ -88,6 +88,24 @@ def list_verifications():
     } for r in records])
 
 
+@verification_bp.route('/diagnostic', methods=['GET'])
+def db_diagnostic():
+    from sqlalchemy import inspect
+    try:
+        inspector = inspect(db.engine)
+        columns = [col['name'] for col in inspector.get_columns('verifications')]
+        return jsonify({
+            "status": "success",
+            "columns": columns,
+            "table_exists": inspector.has_table('verifications')
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
 @verification_bp.route('/<string:verification_token>', methods=['GET'])
 def get_verification(verification_token):
     v = Verification.query.filter_by(verification_token=verification_token).first()
