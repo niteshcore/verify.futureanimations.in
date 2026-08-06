@@ -65,6 +65,27 @@ def generate_verification():
     }), 201
 
 
+@verification_bp.route('/', methods=['GET'])
+@jwt_required()
+def list_verifications():
+    records = Verification.query.order_by(Verification.created_at.desc()).all()
+    return jsonify([{
+        "verification_token": r.verification_token,
+        "student_name": r.student_name,
+        "email": r.email,
+        "internship_role": r.internship_role,
+        "department": r.department,
+        "start_date": r.start_date.isoformat(),
+        "end_date": r.end_date.isoformat(),
+        "issue_date": r.issue_date.isoformat(),
+        "completion_status": r.completion_status,
+        "company_name": r.company_name,
+        "signatory_name": r.signatory_name,
+        "signatory_designation": r.signatory_designation,
+        "created_at": r.created_at.isoformat()
+    } for r in records])
+
+
 @verification_bp.route('/<string:verification_token>', methods=['GET'])
 def get_verification(verification_token):
     v = Verification.query.filter_by(verification_token=verification_token).first()

@@ -135,6 +135,52 @@ class VerificationTestCase(unittest.TestCase):
         response = self.client.get('/api/v1/verification/qr/non-existent-token')
         self.assertEqual(response.status_code, 404)
 
+    def test_list_verifications_requires_auth(self):
+        response = self.client.get('/api/v1/verification/')
+        self.assertEqual(response.status_code, 401)
+
+    def test_list_verifications_success(self):
+        with self.app.app_context():
+            v1 = Verification(
+                verification_token="token-1",
+                student_name="Alice Smith",
+                email="alice@test.com",
+                internship_role="Designer Intern",
+                department="Design",
+                start_date=datetime_from_str("2026-01-01"),
+                end_date=datetime_from_str("2026-03-31"),
+                issue_date=datetime_from_str("2026-04-01"),
+                completion_status="Completed",
+                company_name="The Future Animations",
+                signatory_name="Bob Director",
+                signatory_designation="HR Lead"
+            )
+            v2 = Verification(
+                verification_token="token-2",
+                student_name="Charlie Brown",
+                email="charlie@test.com",
+                internship_role="Developer Intern",
+                department="Engineering",
+                start_date=datetime_from_str("2026-02-01"),
+                end_date=datetime_from_str("2026-04-30"),
+                issue_date=datetime_from_str("2026-05-01"),
+                completion_status="Completed",
+                company_name="The Future Animations",
+                signatory_name="Bob Director",
+                signatory_designation="HR Lead"
+            )
+            db.session.add(v1)
+            db.session.add(v2)
+            db.session.commit()
+
+        headers = {"Authorization": f"Bearer {self.token}"}
+        response = self.client.get('/api/v1/verification/', headers=headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["student_name"], "Charlie Brown") # Sorted desc by created_at
+        self.assertEqual(data[1]["student_name"], "Alice Smith")
+
 def datetime_from_str(s):
     from datetime import datetime
     return datetime.strptime(s, '%Y-%m-%d').date()
