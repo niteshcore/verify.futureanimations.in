@@ -1,14 +1,13 @@
 import uuid
+import hashlib
 from datetime import datetime
 from app.core.extensions import db
 
 class Verification(db.Model):
     __tablename__ = 'verifications'
 
-    # verification_token remains the primary key — preserves existing production schema
+    # Primary key — matches production Supabase schema (never changed)
     verification_token = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
-    # id is a SERIAL column added via migration — used only for certificate_id display
-    id = db.Column(db.Integer, nullable=True)
     student_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     internship_role = db.Column(db.String(100), nullable=False)
@@ -24,9 +23,14 @@ class Verification(db.Model):
 
     @property
     def certificate_id(self):
+        """
+        Generates a stable, human-readable Certificate ID from the verification_token.
+        Uses a SHA-256 hash so the same token always produces the same ID.
+        No database column required — works with the existing production schema.
+        Format: TFA-INT-<YEAR>-<4-digit-number>
+        """
         year = self.issue_date.year if self.issue_date else datetime.utcnow().year
-        if self.id:
-            return f"TFA-INT-{year}-{self.id:03d}"
-        # Fallback before id column is populated (first deploy)
-        short = self.verification_token.replace('-', '')[:5].upper()
-        return f"TFA-INT-{year}-{short}"
+        digest = hashlib.sha256(self.verification_token.encode()).hexdigest()
+        # Take first 8 hex chars → integer → clamp to 4-digit range (1000–9999)
+        num = (int(digest[:8], 16) % 9000) + 1000
+        return f"TFA-INT-{year}-{num}"
