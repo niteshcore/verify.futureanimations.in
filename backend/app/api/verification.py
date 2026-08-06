@@ -90,6 +90,7 @@ def list_verifications():
 
 @verification_bp.route('/diagnostic', methods=['GET'])
 def db_diagnostic():
+    import traceback
     from sqlalchemy import inspect
     try:
         inspector = inspect(db.engine)
@@ -102,8 +103,9 @@ def db_diagnostic():
     except Exception as e:
         return jsonify({
             "status": "error",
-            "message": str(e)
-        }), 500
+            "message": str(e),
+            "traceback": traceback.format_exc()
+        }), 200
 
 
 @verification_bp.route('/<string:verification_token>', methods=['GET'])
