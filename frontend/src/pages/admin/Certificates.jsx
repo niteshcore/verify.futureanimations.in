@@ -62,7 +62,7 @@ const Certificates = () => {
   );
 
   const getVerificationUrl = (token) => {
-    const customBase = import.meta.env.VITE_VERIFICATION_URL_BASE || 'https://futureanimations-verify.vercel.app';
+    const customBase = import.meta.env.VITE_VERIFICATION_URL_BASE || 'https://verifyfutureanimation.online';
     return `${customBase}/verify/${token}`;
   };
 

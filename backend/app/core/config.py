@@ -28,9 +28,9 @@ class Config:
 
     # Always include all known frontend origins so CORS never blocks the frontend
     _known_origins = [
-        "https://futureanimations-verify.vercel.app",   # Vercel deployment (live)
-        "https://verify.futureanimations.in",           # custom domain (when DNS is configured)
-        "https://www.verify.futureanimations.in",
+        "https://verifyfutureanimation.online",
+        "https://www.verifyfutureanimation.online",
+        "https://futureanimations-verify.vercel.app",
         "http://127.0.0.1:5173",
         "http://localhost:5173",
     ]
